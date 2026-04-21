@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     chat_model: str = "deepseek-ai/DeepSeek-R1:novita"
     # Loaded from SYSTEM_PROMPT in .env when present.
     system_prompt: str = SYSTEM_PROMPT
-    cors_origins: str = "*"
+    cors_origins: str = "https://adibhandari.com"
     max_history_messages: int = 40
 
 
@@ -44,7 +44,7 @@ _origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 _wildcard_cors = not _origins or _origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_origins if _origins else ["*"],
+    allow_origins=_origins if _origins else ["https://adibhandari.com"],
     allow_credentials=not _wildcard_cors,
     allow_methods=["*"],
     allow_headers=["*"],
