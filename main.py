@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import uuid
 from collections import defaultdict
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from openai import OpenAI
 from pydantic import AliasChoices, BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -66,6 +68,24 @@ def get_client() -> OpenAI:
     return _client
 
 
+async def build_messages(session_id: str, user_text: str) -> list[dict[str, Any]]:
+    async with _session_lock:
+        history = _sessions[session_id]
+        trimmed = history[-settings.max_history_messages :]
+        _sessions[session_id] = trimmed
+        return [
+            {"role": "system", "content": settings.system_prompt},
+            *trimmed,
+            {"role": "user", "content": user_text},
+        ]
+
+
+async def save_turn(session_id: str, user_text: str, assistant_text: str) -> None:
+    async with _session_lock:
+        _sessions[session_id].append({"role": "user", "content": user_text})
+        _sessions[session_id].append({"role": "assistant", "content": assistant_text})
+
+
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=16000)
     session_id: str | None = Field(default=None, max_length=128)
@@ -103,15 +123,7 @@ async def chat(body: ChatRequest) -> ChatResponse:
 
     client = get_client()
 
-    async with _session_lock:
-        history = _sessions[sid]
-        trimmed = history[-settings.max_history_messages :]
-        _sessions[sid] = trimmed
-        messages: list[dict[str, Any]] = [
-            {"role": "system", "content": settings.system_prompt},
-            *trimmed,
-            {"role": "user", "content": user_text},
-        ]
+    messages = await build_messages(sid, user_text)
 
     try:
         completion = client.chat.completions.create(
@@ -126,11 +138,51 @@ async def chat(body: ChatRequest) -> ChatResponse:
     if not reply:
         raise HTTPException(status_code=502, detail="LLM returned an empty reply.")
 
-    async with _session_lock:
-        _sessions[sid].append({"role": "user", "content": user_text})
-        _sessions[sid].append({"role": "assistant", "content": reply})
+    await save_turn(sid, user_text, reply)
 
     return ChatResponse(reply=reply, session_id=sid)
+
+
+@app.post("/chat/stream")
+async def chat_stream(body: ChatRequest) -> StreamingResponse:
+    sid = body.session_id.strip() if body.session_id else str(uuid.uuid4())
+    if not sid:
+        sid = str(uuid.uuid4())
+
+    user_text = body.message.strip()
+    if not user_text:
+        raise HTTPException(status_code=400, detail="message cannot be empty")
+
+    client = get_client()
+    messages = await build_messages(sid, user_text)
+
+    def event(payload: dict[str, Any]) -> str:
+        return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+    async def stream_events():
+        full_reply = ""
+        try:
+            completion = client.chat.completions.create(
+                model=settings.chat_model,
+                messages=messages,
+                stream=True,
+            )
+            yield event({"type": "session", "session_id": sid})
+            for chunk in completion:
+                delta = chunk.choices[0].delta.content if chunk.choices else None
+                if not delta:
+                    continue
+                full_reply += delta
+                yield event({"type": "token", "content": delta})
+            if not full_reply.strip():
+                yield event({"type": "error", "message": "LLM returned an empty reply."})
+                return
+            await save_turn(sid, user_text, full_reply)
+            yield event({"type": "done", "session_id": sid})
+        except Exception as e:
+            yield event({"type": "error", "message": f"LLM request failed: {e!s}"})
+
+    return StreamingResponse(stream_events(), media_type="text/event-stream")
 
 
 @app.get("/chat/sessions/{session_id}/history", response_model=HistoryResponse)
