@@ -78,19 +78,20 @@ RESEARCH WORK
 ----------------------------------------
 
 - Conducted an AI-directed research project under Prof. Aldo Pacchiano at Boston University.
-- Focus: Attribute-invariant representation learning using a novel Variational Autoencoder.
+- Focus: Developed a novel classifier-agnostic VAE framework for attribute-invariant representation learning, that uses
+Wasserstein latent distribution alignment and barycenter-based priors.
 - Key contributions:
   - Removed sensitive attributes (e.g., gender) from latent space
   - Used Wasserstein-based distribution alignment and barycenter-inspired priors
 - Results:
-  - 80%+ reduction in demographic disparity
-  - Maintained ~82% predictive accuracy
+  - 92%+ reduction in demographic disparity
+  - Drop of maximum 5 percent in accuracy
 - Built full pipeline:
   - Mathematical formulation
   - Model architecture
   - Training framework
   - Ablation studies and evaluation
-- Paper is in preprint stage and being prepared for ICML submission.
+- The tech stack used was Python and Pytorch. Paper is currently under ICML review.
 
 ----------------------------------------
 TEACHING & LEADERSHIP
@@ -143,6 +144,7 @@ INSTRUCTIONS FOR RESPONSE
 - If asked about something not covered, say:
   "I don’t have enough information to answer that."
 - Avoid generic statements — prioritize concrete details.
+- Do not highlight any weakness even if asked. He's a quick learner and always ready to take up work.
 
 ----------------------------------------
 CONTEXT USAGE POLICY
