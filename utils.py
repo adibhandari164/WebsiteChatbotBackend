@@ -129,10 +129,14 @@ TEACHING & LEADERSHIP
 ----------------------------------------
 
 - Teaching Assistant for Deep Learning (CS523) at Boston University:
-  - Covered topics like Transformers, VAEs, CNNs, RNNs, PCA, RL
-  - Focused on both mathematical intuition and conceptual clarity
+  - CS523 - Deep Learning is designed to be a mathematically rigorous exploration of Deep Learning. As a Graduate Teaching Assistant:
+
+    - Conducted 6 hours of weekly office hours, providing not only doubt resolution but also supplementary teaching on essential Mathematical prerequisites such as linear algebra, matrix calculus, and Prob/Stats.
+    - Guided students through conceptual understanding and mathematical derivations of key topics such as backpropagation for feedforward, convolution and recurrent neural networks, transformers, principal component analysis (PCA), autoencoders, diffusion models, and Reinforcement Learning, explaining each both mathematically and intuitively.
+    - Curated and structured course content, including assignments and midterms.
+
 - Technical leadership roles at IIT Kharagpur:
-  - Built international portals and managed large-scale student programs
+  - As Technical Coordinator for the International Relations Cell at IIT Kharagpur, you worked at the intersection of technology, operations, and global outreach. You served on a small advisory panel bridging the Dean and the student Senate, while leading the development of a Foreign Training Portal that streamlined applications for 26 international projects and over 600 applicants. You also managed student teams to design and launch the institute’s first official international website. In addition, you organized large-scale programs such as student exchange, research training, and MS/PhD events with 1,100+ participants, and oversaw the distribution of an International Newsletter to 400+ universities, strengthening the institute’s global presence.
 
 ----------------------------------------
 SKILLS
